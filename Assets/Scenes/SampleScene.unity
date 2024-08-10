@@ -254,6 +254,10 @@ MonoBehaviour:
   optionalCells:
   - cellType: 4
     chance: 100
+  - cellType: 6
+    chance: 100
+  - cellType: 5
+    chance: 100
   cells: []
   sprites:
   - {fileID: 0}

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: ea2236e1f1c76d3458b53766080283de
+guid: 5526054d8c4cf1d4fb9dc49d6a9121ac
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -23,7 +23,7 @@ ScriptedImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
     swizzle: 50462976
-    isReadable: 1
+    isReadable: 0
     streamingMipmaps: 0
     streamingMipmapsPriority: 0
     vTOnly: 0
@@ -97,7 +97,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638589134194529977
+  platformSettingsDirtyTick: 638589135151580213
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -121,18 +121,18 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: end_tile
+  - name: conn_vert
     originalName: 
-    pivot: {x: 0.5, y: -0.071428575}
+    pivot: {x: 0.5, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 14
-      height: 14
-    spriteID: 37b5243ef6262fb4692c1aa8c44106ae
+      width: 4
+      height: 16
+    spriteID: ca8957aaa5271ce459b6f74ba08ea151
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -144,20 +144,20 @@ ScriptedImporter:
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: -1503753884
-    name: end_tile
+    guid: 1701169966
+    name: conn_vert
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: end_tile
+    - name: conn_vert
       frameIndex: 0
       cellRect:
-        x: 1
-        y: 1
-        width: 14
-        height: 14
-      spriteId: 37b5243ef6262fb4692c1aa8c44106ae
+        x: 6
+        y: 0
+        width: 4
+        height: 16
+      spriteId: ca8957aaa5271ce459b6f74ba08ea151
     linkedCells: []
     parentIndex: -1
   platformSettings:

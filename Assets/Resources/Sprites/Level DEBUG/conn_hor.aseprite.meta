@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 2996801f0db4e004698d5c3ccd873c71
+guid: 410b51d8c67e5704492b7794bbcc160f
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -23,7 +23,7 @@ ScriptedImporter:
     normalMapFilter: 0
     flipGreenChannel: 0
     swizzle: 50462976
-    isReadable: 1
+    isReadable: 0
     streamingMipmaps: 0
     streamingMipmapsPriority: 0
     vTOnly: 0
@@ -97,7 +97,7 @@ ScriptedImporter:
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638587599865018653
+  platformSettingsDirtyTick: 638589135056930192
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -121,7 +121,7 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: connector
+  - name: conn_hor
     originalName: 
     pivot: {x: 0.5, y: -1.5}
     alignment: 9
@@ -132,7 +132,7 @@ ScriptedImporter:
       y: 4
       width: 16
       height: 4
-    spriteID: d42a839a2b11096499e82799a7d16698
+    spriteID: 67cb31e33f4e6b449833332ef5f2f68a
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -144,20 +144,20 @@ ScriptedImporter:
   spriteSheetImportData: []
   asepriteLayers:
   - layerIndex: 0
-    guid: -1266613737
-    name: connector
+    guid: 989184214
+    name: conn_hor
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: connector
+    - name: conn_hor
       frameIndex: 0
       cellRect:
         x: 0
         y: 6
         width: 16
         height: 4
-      spriteId: d42a839a2b11096499e82799a7d16698
+      spriteId: 67cb31e33f4e6b449833332ef5f2f68a
     linkedCells: []
     parentIndex: -1
   platformSettings:
