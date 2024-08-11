@@ -24,6 +24,8 @@ public struct CellConnection
 
 public class Cell : MonoBehaviour
 {
+    GameObject iconGameObject = null;
+
     // This is here due to some random issues with rounding of regular positions;
     public string PositionString = string.Empty;
     public List<CellConnection> NextCells = new List<CellConnection>();
@@ -43,10 +45,25 @@ public class Cell : MonoBehaviour
     public Vector2 Size
     {
         get { return gameObject.GetComponent<RectTransform>().sizeDelta; }
-        set { gameObject.GetComponent<RectTransform>().sizeDelta = value; }
+        set
+        {
+            gameObject.GetComponent<RectTransform>().sizeDelta = value;
+            iconGameObject.GetComponent<RectTransform>().sizeDelta = Vector2.one * (value.y - 2);
+        }
     }
 
-    public Image Renderer;
+    public float Scale
+    {
+        get { return gameObject.GetComponent<RectTransform>().localScale.x; }
+        set
+        {
+            gameObject.GetComponent<RectTransform>().localScale = Vector3.one * value;
+            iconGameObject.GetComponent<RectTransform>().localScale = Vector3.one * value * 0.8f;
+        }
+    }
+
+    public Image RendererIcon;
+    public Image RendererFrame;
 
     public void AddConnection(Cell cell, CellType cellType)
     {
@@ -57,26 +74,46 @@ public class Cell : MonoBehaviour
         NextCells.Add(cellConnection);
     }
 
-    public void SetupCell(Sprite sprite)
+    public void SetupCell(Sprite frame, Sprite icon)
     {
-        if (Renderer == null)
-            Renderer = gameObject.AddComponent<Image>();
-        CellSprite = sprite;
-        gameObject.name = $"{CellSprite.name}:{PositionString}";
+        if (RendererFrame == null)
+        {
+            RendererFrame = gameObject.AddComponent<Image>();
+        }
+        RendererFrame.type = Image.Type.Sliced;
+        RendererFrame.pixelsPerUnitMultiplier = 16;
+        RendererFrame.sprite = frame;
+
+        if (iconGameObject == null)
+        {
+            iconGameObject = new GameObject();
+            iconGameObject.transform.SetParent(transform);
+            iconGameObject.name = "Icon";
+            iconGameObject.AddComponent<RectTransform>();
+        }
+
+        RectTransform iconRectTransform = iconGameObject.GetComponent<RectTransform>();
+        iconRectTransform.anchoredPosition = Vector3.zero + Vector3.up * 1;
+        iconRectTransform.sizeDelta = Vector2.one * Size.y;
+
+        if (RendererIcon == null)
+        {
+            RendererIcon = iconGameObject.AddComponent<Image>();
+        }
+        RendererIcon.sprite = icon;
+
+        gameObject.name = $"{CellType}:{PositionString}";
     }
 
-    public Sprite CellSprite
+    public Sprite IconSprite
     {
-        get => Renderer.sprite;
-        set => Renderer.sprite = value;
+        get => RendererIcon.sprite;
+        set => RendererIcon.sprite = value;
     }
 
     public static string GeneratePositionString(Vector3 position)
     {
-        Vector3Int positionInt = new Vector3Int(
-            Mathf.RoundToInt(position.x),
-            Mathf.RoundToInt(position.y)
-        );
+        Vector3Int positionInt = position.ToVectorInt();
         return $"({positionInt.x}:{positionInt.y}:{positionInt.z})";
     }
 }

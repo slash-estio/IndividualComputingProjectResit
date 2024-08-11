@@ -3,15 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using NaughtyAttributes;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class TheConductor : MonoBehaviour
 {
+    #region Variables
     public Vector3 startingPosition;
 
     [SerializeField]
@@ -36,39 +37,41 @@ public class TheConductor : MonoBehaviour
     }
 
     public List<NamedImage> optionalCells;
-
-    [SerializeField]
-    List<Cell> cells;
+    public List<Cell> cells;
+    TheGenerator generator = null;
 
     // Sprites
-    private Sprite[] sprites;
-    private Sprite spriteConnectorH;
-    private Sprite spriteConnectorV;
+    private Sprite[] spriteCellIcons;
+    private Sprite spriteConnector;
+    private Sprite spriteCellFrame;
 
     private GameObject minimapCanvas;
+
+    public int UISize = 48;
+    private int CellSize;
+
+    #endregion
 
     Cell ReplaceCell(Cell cell, CellType cellType)
     {
         cell.CellType = cellType;
-        cell.SetupCell(sprites[(int)cellType]);
+        cell.SetupCell(spriteCellFrame, spriteCellIcons[(int)cellType]);
         return cell;
     }
 
     Cell CreateCell(Vector3 position, CellType cellType)
     {
-        Vector3Int positionInt = new Vector3Int(
-            Mathf.RoundToInt(position.x),
-            Mathf.RoundToInt(position.y)
-        );
+        Vector3Int positionInt = position.ToVectorInt();
         GameObject cellGameObject = new GameObject();
         Cell cell = cellGameObject.AddComponent<Cell>();
         cell.Parent = minimapCanvas.transform;
         cell.AddComponent<RectTransform>();
         cell.Position = positionInt;
-        cell.Size = Vector2.one * 16;
-        cell.PositionString = Cell.GeneratePositionString(positionInt);
+        cell.PositionString = Cell.GeneratePositionString(cell.Position);
         cell.CellType = cellType;
-        cell.SetupCell(sprites[(int)cellType]);
+        cell.SetupCell(spriteCellFrame, spriteCellIcons[(int)cellType]);
+        cell.Size = (Vector2.up + Vector2.right * Utils.Fi) * CellSize;
+        cell.Scale = 1f;
         cells.Add(cell);
         return cell;
     }
@@ -77,25 +80,27 @@ public class TheConductor : MonoBehaviour
     {
         List<Vector3> validPositions = new List<Vector3>
         {
-            Vector3.left,
-            Vector3.right,
-            Vector3.up,
-            Vector3.down
+            Vector3.left * UISize * Utils.Fi,
+            Vector3.right * UISize * Utils.Fi,
+            Vector3.up * UISize,
+            Vector3.down * UISize
         };
         while (validPositions.Count > 0)
         {
             // Select Random Spot from validPositions List
-            Vector3 position = validPositions[
-                UnityEngine.Random.Range(0, validPositions.Count - 1)
-            ];
-            Vector3Int positionInt = new Vector3Int(
-                Mathf.RoundToInt(position.x + previousCell.Position.x),
-                Mathf.RoundToInt(position.y + previousCell.Position.y)
-            );
+            Vector3 position = validPositions[UnityEngine.Random.Range(0, validPositions.Count)];
+            Vector3Int positionInt = new Vector3(
+                position.x + previousCell.Position.x,
+                position.y + previousCell.Position.y
+            ).ToVectorInt();
             string positionString = Cell.GeneratePositionString(positionInt);
 
             // Attempt to find a valid spot...
-            if (cells.Find(e => e.PositionString == positionString) == null)
+            if (
+                cells.Find(e => e.PositionString == positionString) == null
+                && Mathf.Abs(positionInt.x) <= UISize * 5
+                && Mathf.Abs(positionInt.y) <= UISize * 3
+            )
             {
                 Cell newCell = CreateCell(positionInt, cellType);
                 previousCell.AddConnection(newCell, newCell.CellType);
@@ -110,114 +115,131 @@ public class TheConductor : MonoBehaviour
     Cell GeneratePath(int length, Cell startingCell, CellType finalCellType)
     {
         Cell previousCell = startingCell;
-        int _length = length;
-        while (_length > 0)
+        while (length > 0)
         {
             if (previousCell == null)
                 break;
             previousCell = CreateCellAtRandomNeightbor(previousCell, CellType.hall_tile);
-            _length--;
+            length--;
         }
         if (previousCell == null)
             return cells.Last();
         return CreateCellAtRandomNeightbor(previousCell, finalCellType);
     }
 
-    void Start()
+    void GenerateBonusCells()
     {
-        minimapCanvas = GameObject.Find("MinimapCanvas");
-        sprites = new Sprite[Enum.GetValues(typeof(CellType)).Length];
-        for (int i = 0; i < sprites.Length; i++)
-        {
-            sprites[i] = Resources.Load<Sprite>($"Sprites/Level {levelName}/{(CellType)i}");
-        }
-        spriteConnectorH = Resources.Load<Sprite>($"Sprites/Level {levelName}/conn_hor");
-        spriteConnectorV = Resources.Load<Sprite>($"Sprites/Level {levelName}/conn_vert");
-
-        startingPosition = transform.position;
-        Cell startCell = CreateCell(startingPosition, CellType.start_tile);
-
-        return;
-        //Generate Hall To Boss
-        GeneratePath(
-            Mathf.RoundToInt(UnityEngine.Random.Range(pathToBossR.x, pathToBossR.y)),
-            startCell,
-            CellType.end_tile
-        );
-        //Generate Hall To Treasure
-        GeneratePath(
-            Mathf.RoundToInt(UnityEngine.Random.Range(pathToChestR.x, pathToChestR.y)),
-            startCell,
-            CellType.treasure_tile
-        );
-
-        //Generate Halls To Random Positions
-        List<Cell> expansionCells = cells.FindAll(e =>
-            e.CellSprite.name == CellType.hall_tile.ToString()
-        );
-        for (int i = 0; i < coridorCount; i++)
-        {
-            Cell corrCell = expansionCells[UnityEngine.Random.Range(0, expansionCells.Count - 1)];
-            GeneratePath(UnityEngine.Random.Range(0, 3), corrCell, CellType.hall_tile);
-        }
-
-        //Generate Bonus Cells
-
         for (int i = 0; i < optionalCells.Count; i++)
         {
+            bool wasTileCreated = false;
             List<Cell> hallCells = cells.FindAll(e => e.CellType == CellType.hall_tile);
             List<Cell> endCells = hallCells.FindAll(e => e.NextCells.Count == 0);
 
             if (UnityEngine.Random.Range(0, 100) > optionalCells[i].chance)
-                continue;
+                wasTileCreated = true;
 
-            if (endCells.Count > 0)
+            if (wasTileCreated == false && endCells.Count > 0)
             {
                 Cell corrCell = endCells[UnityEngine.Random.Range(0, endCells.Count - 1)];
                 ReplaceCell(corrCell, optionalCells[i].cellType);
-                continue;
+                wasTileCreated = true;
             }
 
             List<Cell> lonelyCells = hallCells.FindAll(e => e.NextCells.Count < 4);
-            if (lonelyCells.Count > 0)
+            if (wasTileCreated == false && lonelyCells.Count > 0)
             {
                 Cell corrCell = lonelyCells[UnityEngine.Random.Range(0, lonelyCells.Count - 1)];
                 CreateCellAtRandomNeightbor(corrCell, optionalCells[i].cellType);
-                continue;
+                wasTileCreated = true;
             }
 
-            print("No more valid cells found for generation... Breaking out of loop.");
-            break;
+            if (wasTileCreated == false)
+                break;
         }
-        // Generate Connecting Graphics
+    }
+
+    void GenerateConnectors()
+    {
         for (int i = 0; i < cells.Count; i++)
         {
             Cell _cell = cells[i];
             for (int j = 0; j < _cell.NextCells.Count; j++)
             {
                 CellConnection cellConnection = _cell.NextCells[j];
+                Cell __cell = cellConnection.cell;
                 GameObject connector = new GameObject();
                 connector.transform.SetParent(minimapCanvas.transform);
+                connector.AddComponent<RectTransform>();
+                RectTransform rectTransform = connector.GetComponent<RectTransform>();
                 connector.name =
                     $"connector:{_cell.PositionString}:{cellConnection.cell.PositionString}";
 
-                connector.transform.position = new Vector3(
-                    (_cell.Position.x + cellConnection.cell.Position.x) / 2,
-                    (_cell.Position.y + cellConnection.cell.Position.y) / 2
-                );
+                rectTransform.anchoredPosition = (_cell.Position + __cell.Position).AvgPoint();
 
                 cellConnection.connector = connector;
-                Vector3Int directionVector = new Vector3Int(
-                    Mathf.RoundToInt(_cell.Position.x - cellConnection.cell.Position.x),
-                    Mathf.RoundToInt(_cell.Position.y - cellConnection.cell.Position.y)
+                Vector2Int directionVector = new Vector2Int(
+                    Mathf.Abs(Mathf.RoundToInt(_cell.Position.y - cellConnection.cell.Position.y)),
+                    Mathf.Abs(Mathf.RoundToInt(_cell.Position.x - cellConnection.cell.Position.x))
                 );
-                if (MathF.Abs(directionVector.y) == 1)
-                    connector.AddComponent<UnityEngine.UI.Image>().sprite = spriteConnectorV;
-                else
-                    connector.AddComponent<UnityEngine.UI.Image>().sprite = spriteConnectorH;
+
+                connector.AddComponent<UnityEngine.UI.Image>().sprite = spriteConnector;
+                rectTransform.localScale = Vector3.one;
+                rectTransform.sizeDelta =
+                    (directionVector / CellSize + Vector2.up + Vector2.right * Utils.Fi)
+                    * (UISize - CellSize);
             }
         }
     }
 
-    void Update() { }
+    void Start()
+    {
+        generator = FindAnyObjectByType<TheGenerator>();
+
+        CellSize = UISize - 2;
+
+        minimapCanvas = GameObject.Find("MinimapCanvas");
+        RectTransform minimapCanvasRT = minimapCanvas.GetComponent<RectTransform>();
+        minimapCanvasRT.sizeDelta = new Vector2(UISize * 8 * Utils.Fi, UISize * 8);
+
+        spriteCellIcons = new Sprite[Enum.GetValues(typeof(CellType)).Length];
+        for (int i = 0; i < spriteCellIcons.Length; i++)
+        {
+            spriteCellIcons[i] = Resources.Load<Sprite>($"Sprites/Level {levelName}/{(CellType)i}");
+        }
+        spriteCellFrame = Resources.Load<Sprite>($"Sprites/Level {levelName}/frame");
+        spriteConnector = Resources.Load<Sprite>($"Sprites/Level {levelName}/connector");
+
+        startingPosition = transform.position;
+        Cell startCell = CreateCell(startingPosition, CellType.start_tile);
+
+        //Generate Hall To Boss
+        GeneratePath(
+            UnityEngine.Random.Range(pathToBossR.x, pathToBossR.y),
+            startCell,
+            CellType.end_tile
+        );
+        //Generate Hall To Treasure
+        GeneratePath(
+            UnityEngine.Random.Range(pathToChestR.x, pathToChestR.y),
+            startCell,
+            CellType.treasure_tile
+        );
+
+        //Generate Halls To Random Positions
+        List<Cell> expansionCells = cells.FindAll(e => e.CellType != CellType.end_tile);
+        for (int i = 0; i < coridorCount; i++)
+            GeneratePath(
+                UnityEngine.Random.Range(0, 3),
+                expansionCells[UnityEngine.Random.Range(0, expansionCells.Count - 1)],
+                CellType.hall_tile
+            );
+
+        //Generate Bonus Cells
+        GenerateBonusCells();
+
+        // Generate Connecting Graphics
+        GenerateConnectors();
+
+        generator.GenerateCells(this);
+    }
 }
