@@ -48,29 +48,41 @@ public class TheGenerator : MonoBehaviour
             GameObject floor = new GameObject("Floor");
             floor.transform.SetParent(parent.transform);
             Tilemap floorTilemap = floor.AddComponent<Tilemap>();
-            floor.AddComponent<TilemapRenderer>();
+            TilemapRenderer floorTilemapRenderer = floor.AddComponent<TilemapRenderer>();
+            floorTilemapRenderer.sortOrder = TilemapRenderer.SortOrder.TopLeft;
 
             Sprite[] validLayouts = Resources.LoadAll<Sprite>($"Rooms/{cell.CellType}/");
             Texture2D selectedLayout = validLayouts[Random.Range(0, validLayouts.Length)].texture;
-            Color32[] pixels = selectedLayout.GetPixels32();
-            Vector2 originPoint = new Vector2(-selectedLayout.width / 2, selectedLayout.height / 2);
+            Color[] pixels = selectedLayout.GetPixels();
+            Vector2 originPoint = new Vector2(selectedLayout.width, selectedLayout.height) / -2;
             for (int j = 0; j < selectedLayout.width; j++)
             {
                 for (int k = 0; k < selectedLayout.height; k++)
                 {
                     TileBase tileToSet = null;
-                    Color32 pixel = pixels[j * selectedLayout.width + k];
-                    if (Color32.Equals(pixel, CustomColors.black))
+                    Color32 pixel = pixels[j + k * (selectedLayout.width)];
+                    Vector3 targetTile = new Vector2(originPoint.x + j, originPoint.y + k);
+                    if (Equals(pixel, CustomColors.black))
                     {
                         tileToSet = floorTile;
                     }
-                    floorTilemap.SetTile(
-                        new Vector3(originPoint.x + j, originPoint.y - k).ToVectorInt(),
-                        tileToSet
-                    );
+                    floorTilemap.SetTile(targetTile.ToVectorInt(), tileToSet);
                 }
             }
+
+            Vector3 previousCellDirection = (
+                cell.PreviousCell.cell.Position - cell.Position
+            ).normalized;
+            addPath(
+                previousCellDirection,
+                floorTilemap,
+                new Vector2(selectedLayout.width, selectedLayout.height)
+            );
         }
+    }
+
+    void addPath(Vector3 direction, Tilemap tilemap, Vector2 roomSize) {
+        Vector3 centerPoint1 = 
     }
 
     // Update is called once per frame

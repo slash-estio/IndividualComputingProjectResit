@@ -80,8 +80,8 @@ public class TheConductor : MonoBehaviour
     {
         List<Vector3> validPositions = new List<Vector3>
         {
-            Vector3.left * UISize * Utils.Fi,
-            Vector3.right * UISize * Utils.Fi,
+            UISize * Utils.Fi * Vector3.left,
+            UISize * Utils.Fi * Vector3.right,
             Vector3.up * UISize,
             Vector3.down * UISize
         };
@@ -104,6 +104,11 @@ public class TheConductor : MonoBehaviour
             {
                 Cell newCell = CreateCell(positionInt, cellType);
                 previousCell.AddConnection(newCell, newCell.CellType);
+                newCell.PreviousCell = new CellConnection
+                {
+                    cell = previousCell,
+                    cellType = previousCell.CellType
+                };
                 return newCell;
             }
             else

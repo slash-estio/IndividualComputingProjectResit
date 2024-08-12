@@ -77,7 +77,7 @@ ScriptedImporter:
     defaultPivotSpace: 0
     defaultPivotAlignment: 7
     customPivotPosition: {x: 0.5, y: 0.5}
-    mosaicPadding: 4
+    mosaicPadding: 0
     spritePadding: 0
     generateModelPrefab: 1
     generateAnimationClips: 1
@@ -90,14 +90,14 @@ ScriptedImporter:
     defaultPivotSpace: 0
     defaultPivotAlignment: 7
     customPivotPosition: {x: 0.5, y: 0.5}
-    mosaicPadding: 4
+    mosaicPadding: 0
     spritePadding: 0
     generateModelPrefab: 1
     generateAnimationClips: 1
     addSortingGroup: 1
     addShadowCasters: 0
   importFileNodeState: 1
-  platformSettingsDirtyTick: 638590143432835116
+  platformSettingsDirtyTick: 638590940499223524
   textureAssetName: 
   singleSpriteImportData:
   - name: 
@@ -128,10 +128,10 @@ ScriptedImporter:
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 4
-      width: 64
-      height: 32
+      x: 0
+      y: 0
+      width: 48
+      height: 74
     spriteID: f9706e65507fd434898c7f9911192fbb
     spriteBone: []
     spriteOutline: []
@@ -140,17 +140,17 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 4, y: 4}
+    uvTransform: {x: 0, y: 0}
   spriteSheetImportData:
   - name: Base_0
     originalName: 
-    pivot: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 36
+      x: 0
+      y: 58
       width: 16
       height: 16
     spriteID: 1b12e67b9a95eff449511528661465df
@@ -164,13 +164,13 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_1
     originalName: 
-    pivot: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 20
-      y: 36
+      x: 16
+      y: 58
       width: 16
       height: 16
     spriteID: 24234bafbda444049ae17d1b46b753ed
@@ -184,13 +184,13 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_2
     originalName: 
-    pivot: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 36
-      y: 36
+      x: 32
+      y: 58
       width: 16
       height: 16
     spriteID: 12d9f4ffeacd7ce4698cf4d24caa0ef7
@@ -204,13 +204,13 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_3
     originalName: 
-    pivot: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 20
+      x: 0
+      y: 42
       width: 16
       height: 16
     spriteID: 25e2e711396fd734da210ba97f45e4a1
@@ -224,13 +224,13 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_4
     originalName: 
-    pivot: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 20
-      y: 20
+      x: 16
+      y: 42
       width: 16
       height: 16
     spriteID: aa8c0af54504baa4eb760a3344410369
@@ -244,13 +244,13 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_5
     originalName: 
-    pivot: {x: 0, y: 0}
+    pivot: {x: 0.5, y: 0.5}
     alignment: 0
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 36
-      y: 20
+      x: 32
+      y: 42
       width: 16
       height: 16
     spriteID: a55aeeff8797afc409deb77df6531dca
@@ -264,15 +264,15 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_6
     originalName: 
-    pivot: {x: 0, y: 0}
-    alignment: 0
+    pivot: {x: 0.5, y: 0.8095238}
+    alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 4
-      y: 4
+      x: 0
+      y: 0
       width: 16
-      height: 16
+      height: 42
     spriteID: 06913e4903b2b9d469678b2733e9cf06
     spriteBone: []
     spriteOutline: []
@@ -284,15 +284,15 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_7
     originalName: 
-    pivot: {x: 0.5, y: 0.5}
-    alignment: 0
+    pivot: {x: 0.5, y: 0.8095238}
+    alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 20
-      y: 4
+      x: 16
+      y: 0
       width: 16
-      height: 16
+      height: 42
     spriteID: 335955a7328f38b4da8c3e20ccf82510
     spriteBone: []
     spriteOutline: []
@@ -304,15 +304,15 @@ ScriptedImporter:
     uvTransform: {x: 0, y: 0}
   - name: Base_8
     originalName: 
-    pivot: {x: 0.5, y: 0.5}
-    alignment: 0
+    pivot: {x: 0.5, y: 0.8095238}
+    alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
-      x: 36
-      y: 4
+      x: 32
+      y: 0
       width: 16
-      height: 16
+      height: 42
     spriteID: b99f477de299b8d4da9735561667a968
     spriteBone: []
     spriteOutline: []
@@ -334,9 +334,9 @@ ScriptedImporter:
       frameIndex: 0
       cellRect:
         x: 0
-        y: 80
+        y: 54
         width: 48
-        height: 48
+        height: 74
       spriteId: f9706e65507fd434898c7f9911192fbb
     linkedCells: []
     parentIndex: -1

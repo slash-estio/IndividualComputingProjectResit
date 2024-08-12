@@ -15,6 +15,7 @@ public enum CellType
     choice_tile = 6,
 }
 
+[Serializable]
 public struct CellConnection
 {
     public Cell cell;
@@ -29,6 +30,8 @@ public class Cell : MonoBehaviour
     // This is here due to some random issues with rounding of regular positions;
     public string PositionString = string.Empty;
     public List<CellConnection> NextCells = new List<CellConnection>();
+
+    public CellConnection PreviousCell;
     public CellType CellType = CellType.hall_tile;
 
     public Transform Parent
