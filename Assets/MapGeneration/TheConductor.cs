@@ -10,6 +10,12 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
+public struct ConnectorObject
+{
+    public GameObject gameObject;
+    public Vector3 originPosition;
+}
+
 public class TheConductor : MonoBehaviour
 {
     #region Variables
@@ -38,11 +44,14 @@ public class TheConductor : MonoBehaviour
 
     public List<NamedImage> optionalCells;
     public List<Cell> cells;
+    public List<ConnectorObject> connectors = new List<ConnectorObject>();
     TheGenerator generator = null;
 
     // Sprites
-    private Sprite[] spriteCellIcons;
+    public Sprite[] spriteCellIcons;
+    public Sprite spriteRoomSign;
     private Sprite spriteConnector;
+    private Sprite spriteCellFrameActive;
     private Sprite spriteCellFrame;
 
     private GameObject minimapCanvas;
@@ -55,13 +64,13 @@ public class TheConductor : MonoBehaviour
     Cell ReplaceCell(Cell cell, CellType cellType)
     {
         cell.CellType = cellType;
-        cell.SetupCell(spriteCellFrame, spriteCellIcons[(int)cellType]);
+        cell.SetupCell(spriteCellFrame, spriteCellFrameActive, spriteCellIcons[(int)cellType]);
         return cell;
     }
 
     Cell CreateCell(Vector3 position, CellType cellType)
     {
-        Vector3Int positionInt = position.ToVectorInt();
+        Vector3Int positionInt = position.ToInt();
         GameObject cellGameObject = new GameObject();
         Cell cell = cellGameObject.AddComponent<Cell>();
         cell.Parent = minimapCanvas.transform;
@@ -69,7 +78,7 @@ public class TheConductor : MonoBehaviour
         cell.Position = positionInt;
         cell.PositionString = Cell.GeneratePositionString(cell.Position);
         cell.CellType = cellType;
-        cell.SetupCell(spriteCellFrame, spriteCellIcons[(int)cellType]);
+        cell.SetupCell(spriteCellFrame, spriteCellFrameActive, spriteCellIcons[(int)cellType]);
         cell.Size = (Vector2.up + Vector2.right * Utils.Fi) * CellSize;
         cell.Scale = 1f;
         cells.Add(cell);
@@ -92,7 +101,7 @@ public class TheConductor : MonoBehaviour
             Vector3Int positionInt = new Vector3(
                 position.x + previousCell.Position.x,
                 position.y + previousCell.Position.y
-            ).ToVectorInt();
+            ).ToInt();
             string positionString = Cell.GeneratePositionString(positionInt);
 
             // Attempt to find a valid spot...
@@ -104,11 +113,7 @@ public class TheConductor : MonoBehaviour
             {
                 Cell newCell = CreateCell(positionInt, cellType);
                 previousCell.AddConnection(newCell, newCell.CellType);
-                newCell.PreviousCell = new CellConnection
-                {
-                    cell = previousCell,
-                    cellType = previousCell.CellType
-                };
+                newCell.AddConnection(previousCell, previousCell.CellType);
                 return newCell;
             }
             else
@@ -138,7 +143,7 @@ public class TheConductor : MonoBehaviour
         {
             bool wasTileCreated = false;
             List<Cell> hallCells = cells.FindAll(e => e.CellType == CellType.hall_tile);
-            List<Cell> endCells = hallCells.FindAll(e => e.NextCells.Count == 0);
+            List<Cell> endCells = hallCells.FindAll(e => e.Connections.Count == 0);
 
             if (UnityEngine.Random.Range(0, 100) > optionalCells[i].chance)
                 wasTileCreated = true;
@@ -150,7 +155,7 @@ public class TheConductor : MonoBehaviour
                 wasTileCreated = true;
             }
 
-            List<Cell> lonelyCells = hallCells.FindAll(e => e.NextCells.Count < 4);
+            List<Cell> lonelyCells = hallCells.FindAll(e => e.Connections.Count < 4);
             if (wasTileCreated == false && lonelyCells.Count > 0)
             {
                 Cell corrCell = lonelyCells[UnityEngine.Random.Range(0, lonelyCells.Count - 1)];
@@ -168,9 +173,9 @@ public class TheConductor : MonoBehaviour
         for (int i = 0; i < cells.Count; i++)
         {
             Cell _cell = cells[i];
-            for (int j = 0; j < _cell.NextCells.Count; j++)
+            for (int j = 0; j < _cell.Connections.Count; j++)
             {
-                CellConnection cellConnection = _cell.NextCells[j];
+                CellConnection cellConnection = _cell.Connections[j];
                 Cell __cell = cellConnection.cell;
                 GameObject connector = new GameObject();
                 connector.transform.SetParent(minimapCanvas.transform);
@@ -181,7 +186,6 @@ public class TheConductor : MonoBehaviour
 
                 rectTransform.anchoredPosition = (_cell.Position + __cell.Position).AvgPoint();
 
-                cellConnection.connector = connector;
                 Vector2Int directionVector = new Vector2Int(
                     Mathf.Abs(Mathf.RoundToInt(_cell.Position.y - cellConnection.cell.Position.y)),
                     Mathf.Abs(Mathf.RoundToInt(_cell.Position.x - cellConnection.cell.Position.x))
@@ -192,6 +196,14 @@ public class TheConductor : MonoBehaviour
                 rectTransform.sizeDelta =
                     (directionVector / CellSize + Vector2.up + Vector2.right * Utils.Fi)
                     * (UISize - CellSize);
+
+                connectors.Add(
+                    new ConnectorObject()
+                    {
+                        gameObject = connector,
+                        originPosition = rectTransform.anchoredPosition,
+                    }
+                );
             }
         }
     }
@@ -211,12 +223,15 @@ public class TheConductor : MonoBehaviour
         {
             spriteCellIcons[i] = Resources.Load<Sprite>($"Sprites/Level {levelName}/{(CellType)i}");
         }
+        spriteRoomSign = Resources.Load<Sprite>($"Sprites/room_sign");
+
         spriteCellFrame = Resources.Load<Sprite>($"Sprites/Level {levelName}/frame");
+        spriteCellFrameActive = Resources.Load<Sprite>($"Sprites/Level {levelName}/frame_active");
         spriteConnector = Resources.Load<Sprite>($"Sprites/Level {levelName}/connector");
 
         startingPosition = transform.position;
         Cell startCell = CreateCell(startingPosition, CellType.start_tile);
-
+        startCell.Active = true;
         //Generate Hall To Boss
         GeneratePath(
             UnityEngine.Random.Range(pathToBossR.x, pathToBossR.y),
@@ -244,7 +259,22 @@ public class TheConductor : MonoBehaviour
 
         // Generate Connecting Graphics
         GenerateConnectors();
+        this.SetMinimapOriginPoint(Vector3.zero);
 
-        generator.GenerateCells(this);
+        generator.Generate(this);
+    }
+
+    public void SetMinimapOriginPoint(Vector3 point)
+    {
+        for (int i = 0; i < cells.Count; i++)
+        {
+            cells[i].IconPosition = cells[i].Position - point;
+        }
+
+        for (int i = 0; i < connectors.Count; i++)
+        {
+            connectors[i].gameObject.GetComponent<RectTransform>().anchoredPosition =
+                connectors[i].originPosition - point;
+        }
     }
 }

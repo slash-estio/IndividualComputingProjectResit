@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public enum CellType
 {
@@ -20,7 +21,7 @@ public struct CellConnection
 {
     public Cell cell;
     public CellType cellType;
-    public GameObject connector;
+    public Door targetDoor;
 }
 
 public class Cell : MonoBehaviour
@@ -29,9 +30,8 @@ public class Cell : MonoBehaviour
 
     // This is here due to some random issues with rounding of regular positions;
     public string PositionString = string.Empty;
-    public List<CellConnection> NextCells = new List<CellConnection>();
+    public List<CellConnection> Connections = new List<CellConnection>();
 
-    public CellConnection PreviousCell;
     public CellType CellType = CellType.hall_tile;
 
     public Transform Parent
@@ -39,7 +39,8 @@ public class Cell : MonoBehaviour
         set { transform.SetParent(value); }
     }
 
-    public Vector3 Position
+    public Vector3 Position;
+    public Vector3 IconPosition
     {
         get { return gameObject.GetComponent<RectTransform>().anchoredPosition; }
         set { gameObject.GetComponent<RectTransform>().anchoredPosition = value; }
@@ -66,18 +67,31 @@ public class Cell : MonoBehaviour
     }
 
     public Image RendererIcon;
+    public Sprite frame;
+    public Sprite frameActive;
     public Image RendererFrame;
+
+    private bool _active;
+    public bool Active
+    {
+        get { return _active; }
+        set
+        {
+            _active = value;
+            RendererFrame.sprite = _active ? frameActive : frame;
+        }
+    }
 
     public void AddConnection(Cell cell, CellType cellType)
     {
         CellConnection cellConnection = new CellConnection();
         cellConnection.cell = cell;
         cellConnection.cellType = cellType;
-        cellConnection.connector = null;
-        NextCells.Add(cellConnection);
+        cellConnection.targetDoor = null;
+        Connections.Add(cellConnection);
     }
 
-    public void SetupCell(Sprite frame, Sprite icon)
+    public void SetupCell(Sprite _frame, Sprite _frameActive, Sprite icon)
     {
         if (RendererFrame == null)
         {
@@ -85,7 +99,9 @@ public class Cell : MonoBehaviour
         }
         RendererFrame.type = Image.Type.Sliced;
         RendererFrame.pixelsPerUnitMultiplier = 16;
-        RendererFrame.sprite = frame;
+        frame = _frame;
+        frameActive = _frameActive;
+        Active = false;
 
         if (iconGameObject == null)
         {
@@ -116,7 +132,7 @@ public class Cell : MonoBehaviour
 
     public static string GeneratePositionString(Vector3 position)
     {
-        Vector3Int positionInt = position.ToVectorInt();
+        Vector3Int positionInt = position.ToInt();
         return $"({positionInt.x}:{positionInt.y}:{positionInt.z})";
     }
 }
